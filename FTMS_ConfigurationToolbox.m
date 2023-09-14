@@ -21,7 +21,7 @@ classdef FTMS_ConfigurationToolbox
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -51,10 +51,15 @@ classdef FTMS_ConfigurationToolbox
     Mass_Heteroelement = 0;         % Choose mass of heteroelement. Use 0 if none. 35Cl =  34.96885271
 
     % Define region of spectrum of highest reliability - used for alignment & statitics 
-    MZ_low  = 300;           % Default = 300
-    MZ_high = 800;           % Default = 800 
-    MinSamples = 1;          % Default = 1
-    PresenceAbsence = false; % Default = false
+    MZ_low  = 300;                  % Default = 300
+    MZ_high = 800;                  % Default = 800 
+    
+    % Statistical parameters
+    CL_alpha = 95;                  % Default = 95 % (equivalent to p-value threshold of 0.05)
+    MinSamples = 1;                 % Default = 1
+    PresenceAbsence = false;        % Default = false
+    pvalue_adjustment = false;       % Default = false
+    p_adjust_method = 'BH';         % Default = 'BH'
                
     % File format - describes the format of the _Final.xlsx sheets.
     % DO NOT CHANGE unless 1) altering the format of the _Final.xlsx sheets in FTMS_FormulaRefinement

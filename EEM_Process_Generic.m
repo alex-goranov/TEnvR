@@ -27,11 +27,11 @@ clear       % Clears the workspace
 close all   % Closes any other MATLAB windows (e.g., Figure pop-ups)
 
 % List the location of your data, sample log, and where you want the processed data to be saved
-Location_RawData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2021\TestData_EEM\TestData_Generic'; 
-Location_SampleLog='C:\Users\Administrator\Documents\MATLAB\TEnvR 2021\TestData_EEM\SampleLog_Generic.csv';
+Location_RawData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2022\TestData_EEM\TestData_Generic'; 
+Location_SampleLog='C:\Users\Administrator\Documents\MATLAB\TEnvR 2022\TestData_EEM\SampleLog_Generic.csv';
 
 % The exported files will be saved in this folder
-Location_ProcessedData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2021\TestData_EEM\TestData_Generic_Processed';
+Location_ProcessedData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2022\TestData_EEM\TestData_Generic_Processed';
 
 %% Stage 1: Import EEM data and other auxiliary files, creates a cube "X" with all the EEM data
 

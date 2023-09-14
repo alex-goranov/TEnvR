@@ -17,7 +17,7 @@ function UVVIS_Process(filename_sample,filename_blank,DF)
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -41,7 +41,7 @@ clearvars -except filename_sample filename_blank DF
 % Parameters that can be modified
 DF_blank=1;         % Dilution factor for the blank 
 Pathlength=1;       % Cuvette pathlength, in cm
-Correction='yes';   % To enable scattering correction = 'yes', to disable = 'no'
+Correction=true;     % To enable scattering correction = true, to disable = false
 
 % If you want to disable the blank-correction, use 'NoBlank' as filename_blank
 
@@ -110,13 +110,13 @@ Data_Sample_Undiluted_Blanked=[Data_Sample_Undiluted(:,1),(Data_Sample_Undiluted
 
 Wavelength_end=Data_Sample_Undiluted_Blanked(end,1);
 if Wavelength_end <= 0
-    Correction = 'no';
+    Correction = false;
 elseif Wavelength_end >= 800
     Wavelength_end = 800;
 end
 
 % Scattering correction
-if strcmp(Correction,'yes')
+if Correction
     if Wavelength_end >= 701
         [Abs700800,~]=Absorbance_Range(Data_Sample_Undiluted_Blanked,701,Wavelength_end);
         Abs700800_AVG=mean(Abs700800);

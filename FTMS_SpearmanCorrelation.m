@@ -14,7 +14,7 @@ function FTMS_SpearmanCorrelation(filename_FTMSdata,filename_externalvariables)
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -99,14 +99,32 @@ Y = ExternalVariables(:,ExternalVariable_Column);
    [r(i),t(i),p(i)] = spear(X,Y); 
 end
 
-p(p >= 0.05) = NaN;
-SpearmanResults=[r',t',p'];
-FTMS_CorrelationResults=[FTMS_Formulas_Data, SpearmanResults];
-FTMS_CorrelationResults(any(isnan(FTMS_CorrelationResults), 2), :) = [];
+if format.pvalue_adjustment
+    q=pval_adjust(p,format.p_adjust_method);
+    q(q >= 1-format.CL_alpha/100) = NaN;
+    SpearmanResults=[r',t',p',q'];
+    FTMS_CorrelationResults=[FTMS_Formulas_Data, SpearmanResults];
+    FTMS_CorrelationResults(any(isnan(FTMS_CorrelationResults), 2), :) = [];
+    
+    if ~isempty(FTMS_CorrelationResults)
+        % Export data in the Excel file
+        xlswrite(filename_results,[FTMS_Formulas_Labels 'r-value' 't-value' 'p-value' 'q-value'],string(ExternalVariable_Label),'A1')
+        xlswrite(filename_results,FTMS_CorrelationResults,string(ExternalVariable_Label),'A2');
+    end
 
-% Export data in the Excel file
-xlswrite(filename_results,[FTMS_Formulas_Labels 'r-value' 't-value' 'p-value'],string(ExternalVariable_Label),'A1')
-xlswrite(filename_results,FTMS_CorrelationResults,string(ExternalVariable_Label),'A2'); 
+else
+    p(p >= 1-format.CL_alpha/100) = NaN;
+    SpearmanResults=[r',t',p'];
+    FTMS_CorrelationResults=[FTMS_Formulas_Data, SpearmanResults];
+    FTMS_CorrelationResults(any(isnan(FTMS_CorrelationResults), 2), :) = [];
+    
+    if ~isempty(FTMS_CorrelationResults)
+        % Export data in the Excel file
+        xlswrite(filename_results,[FTMS_Formulas_Labels 'r-value' 't-value' 'p-value'],string(ExternalVariable_Label),'A1')
+        xlswrite(filename_results,FTMS_CorrelationResults,string(ExternalVariable_Label),'A2'); 
+    end
+    
+end
 
 figure
 hold on

@@ -17,7 +17,7 @@ function Stats_PCA(InputFilename,DataType)
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -38,6 +38,8 @@ function Stats_PCA(InputFilename,DataType)
 clearvars -except InputFilename DataType
 close all
 tic
+
+format=FTMS_ConfigurationToolbox;
 
 if strcmpi(DataType,'UVVIS')
     SpectralData  = true;   % data is spectral/continious;
@@ -73,7 +75,7 @@ Names_Samples=T.Properties.VariableNames;
 
 if strcmpi(DataType,'FTICRMS')
     Names_Samples=Names_Samples(1,1:end-12);
-    Matrix_Original=Matrix_Original(:,1:size(T.Properties.VariableNames,2)-12);
+    Matrix_Original=Matrix_Original(:,1:size(T.Properties.VariableNames,2)-12); % Cuts 12 last columns with formula info
 elseif strcmpi(DataType,'Variables')
     Matrix_Original=Matrix_Original';
     Names_Samples_temp=Names_Samples;
@@ -129,8 +131,14 @@ if SpectralData == 0
     for i=1:CompThreshold % Calc p-values only fore the first 20 principal components
         for j=1:Size_Variables
             [~,p] = corrcoef(Scores(:,i),Matrix(:,j));
-            pvalues(i,j)=p(1,2); 
+            pvalues(i,j)=p(1,2);
         end                             
+    end
+end
+
+if format.pvalue_adjustment
+    for i=1:size(pvalues,1) % Calc q-values for each PC set of p-values
+        qvalues(i,:)=pval_adjust(pvalues(i,:),format.p_adjust_method);
     end
 end
 
@@ -169,6 +177,16 @@ if SpectralData == 0
     end
 end
 
+% qvalues
+if format.pvalue_adjustment
+    output5=[Names_Variables,string(qvalues')];
+    if size(Diagonal_RowSums,1) < 20
+        output5=[' ',LabelPC;output5]; 
+    else
+       output5=[' ',LabelPC(1:20);output5]; 
+    end
+end
+
 % Export everything
 if size(Diagonal_RowSums,1) < 20
     if Variable_text
@@ -183,6 +201,11 @@ if size(Diagonal_RowSums,1) < 20
     if SpectralData == 0
         xlswrite(OutputFilename,output4,'pvalues');
     end
+    
+    if format.pvalue_adjustment
+        xlswrite(OutputFilename,output5,'qvalues');
+    end
+
 else % If the matrix is too big, the computer crashes during export. Export only 20 PC.
     if Variable_text
         xlswrite(OutputFilename,[[' ';Names_Variables],[string(char(Names_Samples))';string(Matrix_Original)]]);
@@ -192,9 +215,15 @@ else % If the matrix is too big, the computer crashes during export. Export only
     xlswrite(OutputFilename,output1(:,1:21),'Scores');
     xlswrite(OutputFilename,output2(:,1:21),'Loadings');
     xlswrite(OutputFilename,output3(1:21,:),'Eigenvalues %');
+    
     if SpectralData == 0
         xlswrite(OutputFilename,output4,'pvalues');
     end
+
+    if format.pvalue_adjustment
+        xlswrite(OutputFilename,output5,'qvalues');
+    end
+
 end
 
 disp(['Principal component analysis using ' char(DataType) ' - Complete! (' num2str(toc) ' seconds)'])

@@ -21,7 +21,7 @@ function FTMS_RefinementFormulas(filename,config)
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Chemistry, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -366,46 +366,98 @@ Data_Stage4 = sortrows(Data_Stage3, format.Column_ExactMass);                 % 
 Data_Stage4_Refined = sortrows(Data_Stage3_Refined, format.Column_ExactMass); % Formulas of high confidence
 
 if config.Filter_KMD
-    % remove formulas of high confidence from all formulas -> identifies which formulas can be refined
-    indices_to_remove = [];
-    i = 1; j = 1;
-    
-    % Identify the indices of "formulas of high confidence" in "all data"
-    while i <= size(Data_Stage4_Refined,1) && j <= size(Data_Stage4, 1) 
-        if intersect(Data_Stage4_Refined(i,format.Column_ExactMass),Data_Stage4(j,format.Column_ExactMass)) > 0
-            indices_to_remove = [indices_to_remove ; j];
-            j = j+1;
-        elseif Data_Stage4_Refined(i,format.Column_ExactMass) < Data_Stage4(j,format.Column_ExactMass)
-            i = i+1;
-        else
-            j = j+1;
+    try
+        % remove formulas of high confidence from all formulas -> identifies which formulas can be refined
+        indices_to_remove = [];
+        i = 1; j = 1;
+        
+        % Identify the indices of "formulas of high confidence" in "all data"
+        while i <= size(Data_Stage4_Refined,1) && j <= size(Data_Stage4, 1) 
+            if intersect(Data_Stage4_Refined(i,format.Column_ExactMass),Data_Stage4(j,format.Column_ExactMass)) > 0
+                indices_to_remove = [indices_to_remove ; j];
+                j = j+1;
+            elseif Data_Stage4_Refined(i,format.Column_ExactMass) < Data_Stage4(j,format.Column_ExactMass)
+                i = i+1;
+            else
+                j = j+1;
+            end
         end
-    end
+        
+        Data_Stage4_Refinable = Data_Stage4(setdiff(1:size(Data_Stage4,1),indices_to_remove),:);
+        search_values = getCompositionAndKMD(Data_Stage4_Refinable,config);
+        kmd_counts = getKMDCounts(Data_Stage4_Refined,config);
     
-    Data_Stage4_Refinable = Data_Stage4(setdiff(1:size(Data_Stage4,1),indices_to_remove),:);
-    search_values = getCompositionAndKMD(Data_Stage4_Refinable,config);
-    kmd_counts = getKMDCounts(Data_Stage4_Refined,config);
-
-    should_refine = true;
-    while should_refine
-        tic
-        new_candidate_ids = kmd_counts.FindMatchingCandidates(search_values, config);
-        removed_candidates = search_values.RemoveCandidates(new_candidate_ids);
-        kmd_counts.UpdateKMDValues(removed_candidates, config);
-        new_candidates = Data_Stage4_Refinable(new_candidate_ids,:);
-        Data_Stage4_Refined = [Data_Stage4_Refined ; new_candidates];
-
-        should_refine = size(new_candidate_ids,1) > 0;
-    end
-
-    % Export all formulas of high confidence (isotope and/or unique + KMD refined)
-    if ~isempty(Data_Stage4_Refined)
-        xlswrite([filename(1:end-6) '_Processing.xlsx'],titles,'Refined w KMD','A1');
-        xlswrite([filename(1:end-6) '_Processing.xlsx'],FormatDataForExport(Data_Stage4_Refined),'Refined w KMD','A2');
-    else
-        xlswrite([filename(1:end-6) '_Processing.xlsx'],{'No formulas were refined with KMD'},'Refined w KMD','A1');
-    end
+        should_refine = true;
+        while should_refine
+            tic
+            new_candidate_ids = kmd_counts.FindMatchingCandidates(search_values, config);
+            removed_candidates = search_values.RemoveCandidates(new_candidate_ids);
+            kmd_counts.UpdateKMDValues(removed_candidates, config);
+            new_candidates = Data_Stage4_Refinable(new_candidate_ids,:);
+            Data_Stage4_Refined = [Data_Stage4_Refined ; new_candidates];
     
+            should_refine = size(new_candidate_ids,1) > 0;
+        end
+    
+        % Export all formulas of high confidence (isotope and/or unique + KMD refined)
+        if ~isempty(Data_Stage4_Refined)
+            xlswrite([filename(1:end-6) '_Processing.xlsx'],titles,'Refined w KMD','A1');
+            xlswrite([filename(1:end-6) '_Processing.xlsx'],FormatDataForExport(Data_Stage4_Refined),'Refined w KMD','A2');
+        else
+            xlswrite([filename(1:end-6) '_Processing.xlsx'],{'No formulas were refined with KMD'},'Refined w KMD','A1');
+        end
+    catch % If above algorithm doesn't work, use the old one (slower one)  
+        last_final_count = 0;
+        while last_final_count ~= size(Data_Stage4_Refined,1)
+            last_final_count = size(Data_Stage4_Refined,1);
+            Data_Stage4_Refined = sortrows(Data_Stage4_Refined, format.Column_ExactMass); %formula list must be sorted every cycle!
+            Data_Stage4 = sortrows(Data_Stage4, format.Column_ExactMass); %formula list must be sorted every cycle!
+            indices_to_remove = [];
+            i = 1; j = 1;
+            while i <= size(Data_Stage4_Refined,1) && j <= size(Data_Stage4, 1) %Identify the indices of "formulas of high confidence" in "all data"
+                if intersect(Data_Stage4_Refined(i,format.Column_ExactMass),Data_Stage4(j,format.Column_ExactMass)) > 0
+                    indices_to_remove = [indices_to_remove ; j];
+                    j = j+1;
+                elseif Data_Stage4_Refined(i,format.Column_ExactMass) < Data_Stage4(j,format.Column_ExactMass)
+                    i = i+1;
+                else
+                    j = j+1;
+                end
+            end
+            
+            %remove formulas of high confidence from all formulas -> identifies which formulas can be refined
+            Data_Stage4_Refinable = Data_Stage4(setdiff(1:size(Data_Stage4,1),indices_to_remove),:); 
+            
+            %Begin the actual refinement process using KMD series
+            kmd_counts = getKMDCounts_OLD(Data_Stage4_Refined,config);
+            search_values = getCompositionAndKMD_OLD(Data_Stage4_Refinable,config);
+            search_values = sortrows(search_values,2);
+            for i=1:size(search_values,1)
+                isMatch = false;
+                for j=1:size(kmd_counts,1)
+                    if strcmp(search_values{i,2},kmd_counts{j,1}) && abs(search_values{i,2+kmd_counts{j,2}}-kmd_counts{j,3}) < 1/10^config.Precision
+                        isMatch = true;
+                        break;
+                    end
+                end
+                if isMatch 
+                    %Adds newly refined formulas to the previous _Refined list (from isotope filter and/or unique)
+                    Data_Stage4_Refined = [Data_Stage4_Refined ; Data_Stage4_Refinable(search_values{i,1},:)]; 
+                end
+            end
+            if ~config.Filter_KMD_Unlimited_Iterations
+                break
+            end
+        end
+        
+        %Export all formulas of high confidence (isotope and/or unique + KMD refined)
+        if ~isempty(Data_Stage4_Refined)
+            xlswrite([filename(1:end-6) '_Processing.xlsx'],titles,'Refined w KMD','A1');
+            xlswrite([filename(1:end-6) '_Processing.xlsx'],FormatDataForExport(Data_Stage4_Refined),'Refined w KMD','A2');
+        else
+            xlswrite([filename(1:end-6) '_Processing.xlsx'],{'No formulas were refined with KMD'},'Refined w KMD','A1');
+        end        
+    end
 else
     Data_Stage4_Refinable=Data_Stage4;
 end
@@ -871,6 +923,59 @@ end
 % Function for Stage4: Gets the string composition and kmd values of a given matrix
 function composition_kmd = getCompositionAndKMD(compound_list,config)
     composition_kmd = FTMS_CandidateCollection(compound_list,config);
+end
+
+% Function for Stage4: Counts the number of points on a KMD series
+function kmd_totals = getKMDCounts_OLD(compound_list,config)
+    composition_kmd = getCompositionAndKMD_OLD(compound_list,config);
+    kmd_counts = cell([size(composition_kmd,1)*size(config.Filter_KMD_Series,2),4]);
+    row_count = 1;
+    for i=1:size(composition_kmd,1)
+        for j=1:size(config.Filter_KMD_Series,2)
+            kmd_counts{row_count,1} = composition_kmd{i,2};
+            kmd_counts{row_count,2} = j;
+            kmd_counts{row_count,3} = round(composition_kmd{i,2+j}(1,1),config.Precision);
+            kmd_counts{row_count,4} = 1;
+            row_count = row_count + 1;
+        end
+    end
+    kmd_counts = sortrows(kmd_counts,[1,2,3]);
+    for i=1:size(kmd_counts,1)-1
+      if strcmp(kmd_counts{i,1}, kmd_counts{i+1,1}) && kmd_counts{i,2}(1,1) == kmd_counts{i+1,2}(1,1) && abs(kmd_counts{i,3}(1,1) - kmd_counts{i+1,3}(1,1)) < 1/10^config.Precision
+        kmd_counts{i+1,4}(1,1) = kmd_counts{i,4}(1,1) + 1;
+      end
+    end
+    kmd_totals = [];
+    previous_count = 1;
+    for i=2:size(kmd_counts,1)
+        if kmd_counts{i,4} <= previous_count && previous_count >= config.Filter_KMD_Series_Threshold
+            kmd_totals = [kmd_totals ; kmd_counts(i-1,:)];
+        end
+        previous_count = kmd_counts{i,4};
+    end
+end
+
+%Function for Stage4: Gets the string composition and kmd values of a given matrix
+function composition_kmd = getCompositionAndKMD_OLD(compound_list,config)
+    global format
+    composition = strings([size(compound_list,1),size(format.elements,2)]);
+    for i=1:size(composition,1)
+        for j=1:size(format.elements,2)
+            if compound_list(i, format.Column_C-1+j) ~= 0
+                composition(i,j) = format.elements(1,j);
+            end
+        end
+    end
+    composition = cellstr(join(composition,"",2));
+
+    kmd_values = zeros([size(compound_list,1),size(config.Filter_KMD_Series,2)]);
+    for i=1:size(composition,1)
+        for j=1:size(config.Filter_KMD_Series,2)
+            km = compound_list(i,format.Column_ExactMass)*config.Filter_KMD_Series(1, j);
+            kmd_values(i,j) = km - floor(km);
+        end
+    end
+    composition_kmd = [num2cell((1:size(compound_list,1)).'),composition, num2cell(kmd_values)];
 end
 
 % Function for Stage 5: Evaluation of formula composition (simple vs complex)

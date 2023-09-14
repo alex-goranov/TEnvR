@@ -14,7 +14,7 @@ function FTMS_KMD_Ox(filename)
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -38,7 +38,8 @@ global Precision
 Precision=format.Precision;
 
 % Load data and sort it by ExactMass
-[Data,~]=xlsread(filename);
+[Data,TXT,~]=xlsread(filename);
+Headers=TXT(1,:);
 Data=sortrows(Data,format.Column_ExactMass); 
 
 Data(:,format.Column_ExactMass)=Data(:,format.Column_C)*format.Mass_12C+Data(:,format.Column_H)*format.Mass_1H+Data(:,format.Column_N)*format.Mass_14N+...
@@ -57,9 +58,9 @@ FunctionalityExactMass_O=format.Mass_16O;
 FunctionalityExactMass_COO=format.Mass_12C+format.Mass_16O+format.Mass_16O;
 FunctionalityExactMass_CO=format.Mass_12C+format.Mass_16O;
 
-[~,Data_SubstratesO,Data_productsO] = KMD_OXanalysis(Data,Masses,FunctionalityExactMass_O);
-[~,Data_SubstratesCO,Data_productsCO] = KMD_OXanalysis(Data,Masses,FunctionalityExactMass_CO);
-[~,Data_SubstratesCOO,Data_productsCOO] = KMD_OXanalysis(Data,Masses,FunctionalityExactMass_COO);
+[~,Data_SubstratesO,Data_productsO] = KMDanalysis(Data,Masses,FunctionalityExactMass_O);
+[~,Data_SubstratesCO,Data_productsCO] = KMDanalysis(Data,Masses,FunctionalityExactMass_CO);
+[~,Data_SubstratesCOO,Data_productsCOO] = KMDanalysis(Data,Masses,FunctionalityExactMass_COO);
 
 % Combine all
 Substrates=[Data_SubstratesO;Data_SubstratesCO;Data_SubstratesCOO];
@@ -125,7 +126,20 @@ if PerUnique+PerSubstrate+PerProducts < 98
     error('Error! The percentages do not equal 100! Revisit the calculations!')
 end
 
+%% Export
+    warning('off','MATLAB:xlswrite:AddSheet')
 
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Headers,'Sheet1','A1')
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Data,'Sheet1','A2')
+
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Headers,'Unique','A1')
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Unique,'Unique','A2')
+
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Headers,'Substrates','A1')
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Substrates,'Substrates','A2')
+
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Headers,'Ox products','A1')
+    xlswrite(['KMD_Oxidation_'  char(filename(1:end-5)) '.xlsx'],Products,'Ox products','A2')
 
 %% Figures
 figurename=[char(filename(1:end-5)) '.png'];
@@ -176,7 +190,7 @@ end
 
 % Function for identifying formulas not sitting on the series ("Unique") as well as 
 % formulas part of series = "duplicates" (from having duplicate or more same KMD values)
-function [Data_Unique,Data_Substrates,Data_Products] = KMD_OXanalysis(Data,Mass,FunctionalityExactMass)
+function [Data_Unique,Data_Substrates,Data_Products] = KMDanalysis(Data,Mass,FunctionalityExactMass)
 
 global Precision
 
@@ -193,6 +207,29 @@ Index_Unique     = find(~ismember(bin, multiple));
 
 Data_Duplicates=Data(Index_Duplicates,:);
 Data_Unique=Data(Index_Unique,:);
+
+% Check if the difference in KM equals the FunctionalityRoundMass % (e.g., for COO, delta KM must be = 44)
+
+Data_Duplicates=sortrows(Data_Duplicates,size(Data_Duplicates,2));
+UniqueKMDvalues=unique(Data_Duplicates(:,size(Data_Duplicates,2))); % identify unique KMD values
+
+Data_Duplicates_verified=[];
+Data_Unique_new=[];
+for i=1:size(UniqueKMDvalues,1) % for each unique KMD value
+    KMDvalue=UniqueKMDvalues(i);
+    index=find(Data_Duplicates(:,size(Data_Duplicates,2)) == KMDvalue); 
+    FormulasWithThisKMD=Data_Duplicates(index,:);
+    dx = diff(FormulasWithThisKMD(:,size(Data_Duplicates,2)-1));
+    
+    if  all(mod(dx/FunctionalityRoundMass,1) == 0)  % all formulas are with the same correct delta KM
+        Data_Duplicates_verified=[Data_Duplicates_verified;FormulasWithThisKMD];  
+    else                                            % some formulas have a bad delta KM
+        Data_Unique_new=[Data_Unique_new;FormulasWithThisKMD];
+    end
+end
+    
+Data_Duplicates=Data_Duplicates_verified;
+Data_Unique=[Data_Unique_new;Data_Unique];
 
 % Identify first and following members of KMD series (substrate + oxidation products) 
 Data_Duplicates=sortrows(Data_Duplicates,size(Data_Duplicates,2));

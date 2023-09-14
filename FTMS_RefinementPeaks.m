@@ -33,18 +33,30 @@ function varargout = FTMS_RefinementPeaks(filename,blank,config)
 %% Stage 1: Data Import and trimming
 
 tic
-dataSample_raw = load(filename);  % load mass list of your sample from a text data file
-dataBlank_raw = load(blank);      % load mass list of the blank from a text data file
+dataSample_raw = readmatrix(filename);  % load mass list of your sample from a text data file
+dataBlank_raw = readmatrix(blank);      % load mass list of the blank from a text data file
 
-% Create ghost S/N values if they are not loaded as third column
 size_dataSample_raw=size(dataSample_raw);
 size_dataBlank_raw=size(dataBlank_raw);
 
+% Trim values based on a S/N threshold 
+if config.SN_trim && size_dataSample_raw(1,2) > 2
+    index = dataSample_raw(:,3) < config.SN_threshold;
+    dataSample_raw=dataSample_raw(~index,:);
+end
+
+if config.SN_trim && size_dataBlank_raw(1,2) > 2
+    index = dataBlank_raw(:,3) < config.SN_threshold;
+    dataBlank_raw=dataBlank_raw(~index,:);
+end
+  
+% Create ghost S/N values if they are not loaded as third column
 if size_dataSample_raw(1,2) == 2
     dataSample_raw=[dataSample_raw,zeros(size_dataSample_raw(1,1),1)];
 elseif size_dataSample_raw(1,2) == 3
     ;
 else
+    dataSample_raw=dataSample_raw(:,1:3);
     disp('Warning! Columns 4 and beyond of the loaded mass list will not be imported!')
 end
 
@@ -53,6 +65,7 @@ if size_dataBlank_raw(1,2) == 2
 elseif size_dataSample_raw(1,2) == 3
     ;
 else
+    dataBlank_raw=dataBlank_raw(:,1:3);
     disp('Warning! Columns 4 and beyond of the loaded mass list will not be imported!')
 end
 

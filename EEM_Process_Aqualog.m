@@ -31,13 +31,13 @@ close all   % Closes any other MATLAB windows (e.g., Figure pop-ups)
 %Location_RawData='C:\Users\Administrator\Documents\MATLAB\TEnvR\TestData_EEM\TestData_Aqualog'; 
 %Location_SampleLog='C:\Users\Administrator\Documents\MATLAB\TEnvR\TestData_EEM\SampleLog_Aqualog.csv';
 
-Location_RawData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2021\TestData_EEM\TestData_Aqualog'; 
-Location_SampleLog='C:\Users\Administrator\Documents\MATLAB\TEnvR 2021\TestData_EEM\SampleLog_Aqualog.csv';
+Location_RawData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2022\TestData_EEM\TestData_Aqualog'; 
+Location_SampleLog='C:\Users\Administrator\Documents\MATLAB\TEnvR 2022\TestData_EEM\SampleLog_Aqualog.csv';
 
 % The exported files will be saved in this folder:
 %Location_ProcessedData='C:\Users\Administrator\Documents\MATLAB\TEnvR\TestData_EEM\TestData_Aqualog_Processed'; 
 
-Location_ProcessedData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2021\TestData_EEM\TestData_Aqualog_Processed';
+Location_ProcessedData='C:\Users\Administrator\Documents\MATLAB\TEnvR 2022\TestData_EEM\TestData_Aqualog_Processed';
 %% Stage 1: Import EEM data files, creates a cube "X" with all the data
 
 cd(Location_RawData)

@@ -17,7 +17,7 @@ classdef FTMS_ConfigurationAssignment
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -39,8 +39,10 @@ classdef FTMS_ConfigurationAssignment
     %% PEAK REFINEMENT
 
     % Define m/z cutoffs
-    MZcutoff_low=0;     % Low m/z value
-    MZcutoff_high=2000; % High m/z value
+    MZcutoff_low=0;     % Low m/z value, Default = 0
+    MZcutoff_high=2000; % High m/z value, Default = 2000
+    SN_trim = false;    % Default = false
+    SN_threshold = 3;   % Default = 3
 
     % Export peaks which have associated 37Cl isotopologues (i.e., organochlorine formulas)
     Export_Cl=false;
@@ -62,7 +64,7 @@ classdef FTMS_ConfigurationAssignment
 
     % Elemental criteria (ranges) 
     C_min = 5;      H_min = 5;      O_min = 1;      N_min = 0;
-                    H_max = 100;    O_max = 30;     N_max = 5;
+                    H_max = 100;    O_max = 50;     N_max = 5;
 
     S_min = 0;      P_min = 0;      E_min = 0;      K_min = 0;      Na_min = 0;
     S_max = 4;      P_max = 2;      E_max = 0;      K_max = 0;      Na_max = 0;
