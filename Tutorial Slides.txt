@@ -1,5 +1,4 @@
-To download PPTX slides use one of the following links:
+To download PPTX slides use the following link:
 
-https://www.dropbox.com/s/b8x83pm8tajoqgf/2021%20TEnvR%20Tutorial%20Slides.pptx?dl=0
+https://www.dropbox.com/scl/fi/4mwlrdp98ym9eslifd4a0/2022-TEnvR-Tutorial-Slides.pptx?rlkey=tw9s43hb17rwrie17yag049wr&dl=0
 
-https://www.researchgate.net/profile/Aleksandar-Goranov-2/project/TEnvR-MATLAB-based-Toolbox-for-Environmental-Research/attachment/63e2e9e697e2867d507f0aed/AS:11431281118606276@1675815395571/download/2021+TEnvR+Tutorial+Slides.pptx?context=ProjectUpdatesLog
