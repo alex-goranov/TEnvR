@@ -1,3 +1,5 @@
+classdef FTMS_Candidate < handle
+    
 %% Copyright and License Notice: 
 
 % Copyright © 2022 Old Dominion University Research Foundation, Norfolk VA, USA
@@ -5,7 +7,7 @@
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
 % Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Journal TBD, doi: XXXXXXXXXXX.
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -19,9 +21,8 @@
 % (located in the Supplementary files directory of the toolbox). If not, see <https://www.gnu.org/licenses/>.
 
 % Please contact the corresponding authors Drs. Aleksandar Goranov (aleksandar.i.goranov@gmail.com) 
-% and Patrick Hatcher (phatcher@odu.edu) with any questions or concerns.
-
-classdef FTMS_Candidate < handle
+% and Patrick Hatcher (phatcher@odu.edu) with any questions or concerns. 
+    
     properties
         CompoundId
         KMD_Value
