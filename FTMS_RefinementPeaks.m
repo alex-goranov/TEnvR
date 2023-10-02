@@ -319,12 +319,12 @@ if config.Export_Cl
     DataRefinedCl = DataRefined(DataRefined(:,22) ~= 0,[1,2]);
 
     fileID = fopen([filename(1:end-4) '_Refinement_Cl.txt'], 'w');
-    fprintf(fileID,'%.10f %.0f\r\n', DataRefinedCl');
+    fprintf(fileID,'%.10f %.6f\r\n', DataRefinedCl');
     fclose(fileID);   
 end
 
 fileID = fopen([filename(1:end-4) '_Refinement.txt'], 'w');
-fprintf(fileID,'%.10f %.0f\r\n', DataRefined_ExportTXT');
+fprintf(fileID,'%.10f %.6f\r\n', DataRefined_ExportTXT');
 fclose(fileID);
 
 xlswrite([filename(1:end-4) '_Refinement.xlsx'], DataRefined_Titles, 'DataRefined', 'A1');

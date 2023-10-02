@@ -16,8 +16,8 @@ function UVVIS_Process(filename_sample,filename_blank,DF)
 % All rights reserved.
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
-% Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
+% Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. G. (2023): 
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: 10.1039/d3ay00750b.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
@@ -60,6 +60,9 @@ if blank_correction
 else
     Data_Blank=[Data_Sample(:,1),zeros(size(Data_Sample(:,1),1),1)];
 end
+
+Data_Sample(any(isnan(Data_Sample),2),:) = [];
+Data_Blank(any(isnan(Data_Blank),2),:) = [];
 
 % Sort
 Data_Sample_Sorted = sortrows(Data_Sample,1); % Sorts data short -> long wavelength
