@@ -6,8 +6,8 @@ classdef FTMS_CandidateCollection < handle
 % All rights reserved.
 
 % This file is part of the Toolbox for Environmental Research (TEnvR). Please cite the toolbox as follows: 
-% Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. (2023): 
-% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: XXXXXXXXXXX.
+% Goranov, A. I., Sleighter, R. L., Yordanov, D. A., and Hatcher, P. G. (2023): 
+% TEnvR: MATLAB-Based Toolbox for Environmental Research, Analytical Methods, doi: 10.1039/d3ay00750b.
 
 % TEnvR is free software for non-commercial use: you can redistribute it and/or modify 
 % %it under the terms of the GNU General Public License as published by the Free Software Foundation, 
